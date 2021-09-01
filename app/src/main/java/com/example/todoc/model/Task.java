@@ -1,6 +1,6 @@
 package com.example.todoc.model;
 
-import android.graphics.Color;
+import android.content.ContentValues;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,24 +16,18 @@ import java.util.Comparator;
  *
  * @author Gaëtan HERFRAY
  */
-@Entity()
+@Entity(foreignKeys = @ForeignKey(entity = Project.class,
+        parentColumns = "project_id",
+        childColumns = "project_id"))
 public class Task {
-    /**
-     * The unique identifier of the task
-     */
+
     @ColumnInfo(name = "task_id")
     @PrimaryKey(autoGenerate = true)
     private long id;
 
-    /**
-     * The unique identifier of the project associated to the task
-     */
     @ColumnInfo(name = "project_id")
-    private long projectId;
+    private long project_id;
 
-    /**
-     * The name of the task
-     */
     // Suppress warning because setName is called in constructor
     @SuppressWarnings("NullableProblems")
     @NonNull
@@ -46,14 +40,8 @@ public class Task {
     @SuppressWarnings("NullableProblems")
     private long creationTimestamp;
 
-    /**
-     * Instantiates a new Task.
-     *
-     * @param id                the unique identifier of the task to set
-     * @param projectId         the unique identifier of the project associated to the task to set
-     * @param name              the name of the task to set
-     * @param creationTimestamp the timestamp when the task has been created to set
-     */
+    public Task(){}
+
     public Task(long id, long projectId, @NonNull String name, long creationTimestamp) {
         this.setId(id);
         this.setProjectId(projectId);
@@ -61,79 +49,46 @@ public class Task {
         this.setCreationTimestamp(creationTimestamp);
     }
 
-    /**
-     * Returns the unique identifier of the task.
-     *
-     * @return the unique identifier of the task
-     */
-    public long getId() {
-        return id;
-    }
+    // --- GETTER ---
 
-    /**
-     * Sets the unique identifier of the task.
-     *
-     * @param id the unique idenifier of the task to set
-     */
-    private void setId(long id) {
-        this.id = id;
-    }
-
-    /**
-     * Sets the unique identifier of the project associated to the task.
-     *
-     * @param projectId the unique identifier of the project associated to the task to set
-     */
-    private void setProjectId(long projectId) {
-        this.projectId = projectId;
-    }
-
-    /**
-     * Returns the project associated to the task.
-     *
-     * @return the project associated to the task
-     */
     @Nullable
     public Project getProject() {
-        return Project.getProjectById(projectId);
+        return Project.getProjectById(project_id);
     }
 
-    public long getProjectId(){return projectId;}
+    public long getProjectId(){return this.project_id;}
 
-    /**
-     * Returns the name of the task.
-     *
-     * @return the name of the task
-     */
+    public long getId() {
+        return this.id;
+    }
+
     @NonNull
     public String getName() {
         return name;
     }
 
-    /**
-     * Sets the name of the task.
-     *
-     * @param name the name of the task to set
-     */
+    public long getCreationTimestamp(){
+        return this.creationTimestamp;
+    }
+
+    // --- SETTER ---
+
+    private void setId(long id) {
+        this.id = id;
+    }
+    private void setProjectId(long projectId) {
+        this.project_id = projectId;
+    }
     private void setName(@NonNull String name) {
         this.name = name;
     }
 
-    /**
-     * Sets the timestamp when the task has been created.
-     *
-     * @param creationTimestamp the timestamp when the task has been created to set
-     */
     private void setCreationTimestamp(long creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
     }
 
-    public long getCreationTimestamp(){
-        return this.creationTimestamp;
-    }
-    /**
-     * Comparator to sort task from A to Z
-     */
+    // --- Comparator ---
+
     public static class TaskAZComparator implements Comparator<Task> {
         @Override
         public int compare(Task left, Task right) {
@@ -141,9 +96,6 @@ public class Task {
         }
     }
 
-    /**
-     * Comparator to sort task from Z to A
-     */
     public static class TaskZAComparator implements Comparator<Task> {
         @Override
         public int compare(Task left, Task right) {
@@ -151,9 +103,6 @@ public class Task {
         }
     }
 
-    /**
-     * Comparator to sort task from last created to first created
-     */
     public static class TaskRecentComparator implements Comparator<Task> {
         @Override
         public int compare(Task left, Task right) {
@@ -161,13 +110,18 @@ public class Task {
         }
     }
 
-    /**
-     * Comparator to sort task from first created to last created
-     */
     public static class TaskOldComparator implements Comparator<Task> {
         @Override
         public int compare(Task left, Task right) {
             return (int) (left.creationTimestamp - right.creationTimestamp);
         }
+    }
+
+    public static Task fromContentValues(ContentValues values){
+        final Task task = new Task();
+        if (values.containsKey("name")) task.setName(values.getAsString("name"));
+        if (values.containsKey("project_id")) task.setProjectId(values.getAsLong("project_id"));
+        if (values.containsKey("creationTimestamp")) task.setCreationTimestamp(values.getAsLong("creationTimestamp"));
+        return task;
     }
 }

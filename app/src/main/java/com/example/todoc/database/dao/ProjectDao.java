@@ -16,11 +16,11 @@ public interface ProjectDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void createProject(Project project);
 
-    @Query("SELECT * FROM Project WHERE id = :projectId")
-    LiveData<Project> getProject(long projectId);
+    @Query("SELECT * FROM Project WHERE project_id = :project_id")
+    LiveData<Project> getProject(long project_id);
 
     @Delete
-    void deleteProject(long projectId);
+    void deleteProject(Project project);
 
 
 

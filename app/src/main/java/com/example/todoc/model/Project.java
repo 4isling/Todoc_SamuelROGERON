@@ -8,9 +8,7 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-@Entity(foreignKeys = @ForeignKey(entity = Project.class,
-        parentColumns = "id",
-        childColumns = "project_id"))
+@Entity()
 public class Project {
     @ColumnInfo(name = "project_id")
     @PrimaryKey

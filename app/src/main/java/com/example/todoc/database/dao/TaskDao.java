@@ -26,7 +26,13 @@ public interface TaskDao {
     LiveData<List<Task>> getTaskByProject(long project_id);
 
     @Query("SELECT * FROM Task WHERE project_id = :project_id")
-    Cursor getTasksWithCursor(long project_id);
+    Cursor getTasksByProjectWithCursor(long project_id);
+
+    @Query("SELECT * FROM Task WHERE task_id = :task_id")
+    LiveData<List<Task>> getTask(long task_id);
+
+    @Query("SELECT * FROM Task WHERE task_id = :task_id")
+    Cursor getTaskWithCursor(long task_id);
 
     @Insert
     long insertTask(Task task);
@@ -35,5 +41,5 @@ public interface TaskDao {
     int updateTask(Task task);
 
     @Delete
-    void deleteTask(long taskId);
+    int deleteTask(long taskId);
 }

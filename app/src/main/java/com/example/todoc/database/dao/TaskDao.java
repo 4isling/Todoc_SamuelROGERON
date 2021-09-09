@@ -15,18 +15,15 @@ import com.example.todoc.model.Task;
 import java.util.List;
 
 @Dao
-public interface TaskDao {
+public interface  TaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void createTask(Task task);
 
     @Query("SELECT * FROM task")
     LiveData<List<Task>> getAllTask();
 
-    @Query("SELECT * FROM Task WHERE project_id = :project_id")
-    LiveData<List<Task>> getTaskByProject(long project_id);
-
-    @Query("SELECT * FROM Task WHERE project_id = :project_id")
-    Cursor getTasksByProjectWithCursor(long project_id);
+    @Query("SELECT project_id FROM Task WHERE task_id = :task_id")
+    LiveData<Long> getTaskProject(Long task_id);
 
     @Query("SELECT * FROM Task WHERE task_id = :task_id")
     LiveData<List<Task>> getTask(long task_id);
@@ -41,5 +38,8 @@ public interface TaskDao {
     int updateTask(Task task);
 
     @Delete
-    int deleteTask(long taskId);
+    int deleteTask(Task task);
+
+    @Query("DELETE FROM Task WHERE task_id = :task_id")
+    int deleteTask(long task_id);
 }

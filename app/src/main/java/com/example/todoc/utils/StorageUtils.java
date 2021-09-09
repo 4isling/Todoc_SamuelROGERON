@@ -99,14 +99,12 @@ public class StorageUtils {
             file.getParentFile().mkdirs();
 
             FileOutputStream fos = new FileOutputStream(file);
-            Writer w = new BufferedWriter(new OutputStreamWriter(fos));
 
-            try {
+            try (Writer w = new BufferedWriter(new OutputStreamWriter(fos))) {
                 w.write(text);
                 w.flush();
                 fos.getFD().sync();
             } finally {
-                w.close();
                 Toast.makeText(context, context.getString(R.string.saved), Toast.LENGTH_LONG).show();
             }
 

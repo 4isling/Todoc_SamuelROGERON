@@ -8,7 +8,6 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import com.example.todoc.model.Project;
-import com.example.todoc.model.Task;
 
 @Dao
 public interface ProjectDao {
@@ -21,7 +20,5 @@ public interface ProjectDao {
 
     @Delete
     void deleteProject(Project project);
-
-
 
 }

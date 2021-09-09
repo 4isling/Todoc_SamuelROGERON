@@ -31,6 +31,7 @@ public abstract class SaveMyTaskDatabase extends RoomDatabase {
                             SaveMyTaskDatabase.class, "TheDataBase.db")
                             .addCallback(prepopulateDatabase())
                             .build();
+
                 }
             }
         }
@@ -41,14 +42,6 @@ public abstract class SaveMyTaskDatabase extends RoomDatabase {
         return new Callback() {
             @Override
             public void onCreate(@NonNull SupportSQLiteDatabase db) {
-                super.onCreate(db);
-                ContentValues contentValues = new ContentValues();
-                contentValues.put("task_id",1);
-                contentValues.put("name", "Vitres IBM");
-                contentValues.put("project_id", 1L);
-
-                db.insert("Task", OnConflictStrategy.IGNORE, contentValues);
-
                 super.onCreate(db);
                 ContentValues contentValues1 = new ContentValues();
                 contentValues1.put("project_id", 1);
@@ -71,6 +64,5 @@ public abstract class SaveMyTaskDatabase extends RoomDatabase {
                 db.insert("Project", OnConflictStrategy.IGNORE, contentValues3);
             }
         };
-
     }
 }

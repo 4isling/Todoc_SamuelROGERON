@@ -1,19 +1,17 @@
 package com.example.todoc.ui;
 
-import android.content.res.ColorStateList;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cleanup.todoc.R;
-import com.example.todoc.model.Project;
 import com.example.todoc.model.Task;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,23 +23,14 @@ public class TasksAdapter extends RecyclerView.Adapter<TaskViewHolder> {
     /**
      * The list of tasks the adapter deals with
      */
-    @NonNull
     private List<Task> tasks;
 
-    /**
-     * The listener for when a task needs to be deleted
-     */
-    @NonNull
-    private final DeleteTaskListener deleteTaskListener;
+    public interface Listener { void onClickDeleteButton(int position);}
+    private final Listener callback;
 
-    /**
-     * Instantiates a new TasksAdapter.
-     *
-     * @param tasks the list of tasks the adapter deals with to set
-     */
-    TasksAdapter(@NonNull final List<Task> tasks, @NonNull final DeleteTaskListener deleteTaskListener) {
-        this.tasks = tasks;
-        this.deleteTaskListener = deleteTaskListener;
+    public TasksAdapter(Listener callback) {
+        this.tasks = new ArrayList<>();
+        this.callback = callback;
     }
 
     /**
@@ -57,8 +46,11 @@ public class TasksAdapter extends RecyclerView.Adapter<TaskViewHolder> {
     @NonNull
     @Override
     public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_task, viewGroup, false);
-        return new TaskViewHolder(view, deleteTaskListener);
+        Context context = viewGroup.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View view = inflater.inflate(R.layout.item_task, viewGroup, false);
+
+        return new TaskViewHolder(view);
     }
 
     @Override
@@ -68,12 +60,19 @@ public class TasksAdapter extends RecyclerView.Adapter<TaskViewHolder> {
 
     @Override
     public int getItemCount() {
-        return tasks.size();
+        return this.tasks.size();
     }
 
-    /**
-     * Listener for deleting tasks
-     */
+    public Task getTask(int position){
+        return this.tasks.get(position);
+    }
+
+    public void updateData(List<Task> tasks){
+        this.tasks = tasks;
+        this.notifyDataSetChanged();
+    }
+
+
     public interface DeleteTaskListener {
         /**
          * Called when a task needs to be deleted.

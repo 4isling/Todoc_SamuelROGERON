@@ -25,6 +25,10 @@ public class TaskDataRepository {
         return this.taskDao.getTaskWithCursor(task_id);
     }
 
+    public LiveData<List<Task>> getAllTask(){
+        return this.taskDao.getAllTask();
+    }
+
     public void createTask(Task task){
         this.taskDao.createTask(task);
     }
@@ -35,6 +39,10 @@ public class TaskDataRepository {
 
     public int updateTask(Task task){
         return this.taskDao.updateTask(task);
+    }
+
+    public LiveData<Long> getTaskProject(long task_id){
+        return this.taskDao.getTaskProject(task_id);
     }
 
     public void deleteTask(long task_id){

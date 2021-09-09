@@ -1,6 +1,6 @@
 package com.example.todoc.ui;
 
-import android.content.res.ColorStateList;
+import android.annotation.SuppressLint;
 import android.view.View;
 import android.widget.TextView;
 
@@ -12,12 +12,14 @@ import com.cleanup.todoc.R;
 import com.example.todoc.model.Project;
 import com.example.todoc.model.Task;
 
+import java.lang.ref.WeakReference;
+
 /**
  * <p>ViewHolder for task items in the tasks list</p>
  *
  * @author Gaëtan HERFRAY
  */
-class TaskViewHolder extends RecyclerView.ViewHolder {
+class TaskViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
     /**
      * The circle icon showing the color of the project
      */
@@ -41,33 +43,21 @@ class TaskViewHolder extends RecyclerView.ViewHolder {
     /**
      * The listener for when a task needs to be deleted
      */
-    private final TasksAdapter.DeleteTaskListener deleteTaskListener;
 
+    private WeakReference<TasksAdapter.Listener> callbackWeakRef;
     /**
      * Instantiates a new TaskViewHolder.
      *
      * @param itemView the view of the task item
-     * @param deleteTaskListener the listener for when a task needs to be deleted to set
-     */
-    TaskViewHolder(@NonNull View itemView, @NonNull TasksAdapter.DeleteTaskListener deleteTaskListener) {
-        super(itemView);
 
-        this.deleteTaskListener = deleteTaskListener;
+     */
+    TaskViewHolder(@NonNull View itemView) {
+        super(itemView);
 
         imgProject = itemView.findViewById(R.id.img_project);
         lblTaskName = itemView.findViewById(R.id.lbl_task_name);
         lblProjectName = itemView.findViewById(R.id.lbl_project_name);
         imgDelete = itemView.findViewById(R.id.img_delete);
-
-        imgDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final Object tag = view.getTag();
-                if (tag instanceof Task) {
-                    TaskViewHolder.this.deleteTaskListener.onDeleteTask((Task) tag);
-                }
-            }
-        });
     }
 
     /**
@@ -75,18 +65,28 @@ class TaskViewHolder extends RecyclerView.ViewHolder {
      *
      * @param task the task to bind in the item view
      */
+    @SuppressLint("RestrictedApi")
     void bind(Task task) {
         lblTaskName.setText(task.getName());
         imgDelete.setTag(task);
 
         final Project taskProject = task.getProject();
         if (taskProject != null) {
-            imgProject.setSupportImageTintList(ColorStateList.valueOf(taskProject.getColor()));
+            //imgProject.setSupportImageTintList(ColorStateList.valueOf(taskProject.getColor()));
+            imgProject.setColorFilter(taskProject.getColor());
             lblProjectName.setText(taskProject.getName());
         } else {
             imgProject.setVisibility(View.INVISIBLE);
             lblProjectName.setText("");
         }
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        TasksAdapter.Listener callback = callbackWeakRef.get();
+        if(callback != null){
+            callback.onClickDeleteButton(getAbsoluteAdapterPosition());
+        }
     }
 }

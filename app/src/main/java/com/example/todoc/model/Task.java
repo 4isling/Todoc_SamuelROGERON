@@ -9,6 +9,7 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import java.util.Calendar;
 import java.util.Comparator;
 
 /**
@@ -23,27 +24,33 @@ public class Task {
 
     @ColumnInfo(name = "task_id")
     @PrimaryKey(autoGenerate = true)
-    private long id;
+    public long id;
 
     @ColumnInfo(name = "project_id")
-    private long project_id;
+    public long project_id;
 
     // Suppress warning because setName is called in constructor
     @SuppressWarnings("NullableProblems")
     @NonNull
     @ColumnInfo(name = "task_name")
-    private String name;
+    public String name;
 
     /**
      * The timestamp when the task has been created
      */
     @SuppressWarnings("NullableProblems")
-    private long creationTimestamp;
+    public long creationTimestamp;
+
+    private static Calendar cal = Calendar.getInstance();
+    private static long CREATION_TIMESTAMP = cal.getTimeInMillis();
 
     public Task(){}
 
-    public Task(long id, long projectId, @NonNull String name, long creationTimestamp) {
-        this.setId(id);
+    public Task(@NonNull String name) {
+        this.name = name;
+    }
+
+    public Task(long projectId, @NonNull String name, long creationTimestamp) {
         this.setProjectId(projectId);
         this.setName(name);
         this.setCreationTimestamp(creationTimestamp);
@@ -73,17 +80,17 @@ public class Task {
 
     // --- SETTER ---
 
-    private void setId(long id) {
+    public void setId(long id) {
         this.id = id;
     }
-    private void setProjectId(long projectId) {
+    public void setProjectId(long projectId) {
         this.project_id = projectId;
     }
-    private void setName(@NonNull String name) {
+    public void setName(@NonNull String name) {
         this.name = name;
     }
 
-    private void setCreationTimestamp(long creationTimestamp) {
+    public void setCreationTimestamp(long creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
     }
 
@@ -121,7 +128,7 @@ public class Task {
         final Task task = new Task();
         if (values.containsKey("name")) task.setName(values.getAsString("name"));
         if (values.containsKey("project_id")) task.setProjectId(values.getAsLong("project_id"));
-        if (values.containsKey("creationTimestamp")) task.setCreationTimestamp(values.getAsLong("creationTimestamp"));
+        if (values.containsKey("creationTimestamp")) task.setCreationTimestamp(CREATION_TIMESTAMP);
         return task;
     }
 }

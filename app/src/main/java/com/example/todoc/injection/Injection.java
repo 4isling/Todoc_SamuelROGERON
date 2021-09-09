@@ -1,13 +1,8 @@
 package com.example.todoc.injection;
 
-import android.content.ContentValues;
 import android.content.Context;
 
-import androidx.lifecycle.ViewModel;
-
 import com.example.todoc.database.SaveMyTaskDatabase;
-import com.example.todoc.model.Project;
-import com.example.todoc.model.Task;
 import com.example.todoc.repositories.ProjectDataRepository;
 import com.example.todoc.repositories.TaskDataRepository;
 

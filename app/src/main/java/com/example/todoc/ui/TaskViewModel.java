@@ -28,10 +28,6 @@ public class TaskViewModel extends ViewModel {
         this.executor = executor;
     }
 
-    public void init() {
-        currentTask = taskDataSource.getAllTask();
-    }
-
     // -------------
     // FOR project
     // -------------

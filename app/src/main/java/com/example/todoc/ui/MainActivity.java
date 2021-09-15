@@ -126,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
     private void configureViewModel(){
         ViewModelFactory mViewModelFactory = Injection.provideViewModelFactory(this);
         this.taskViewModel = ViewModelProviders.of(this, mViewModelFactory).get(TaskViewModel.class);
-        this.taskViewModel.init();
     }
 
     private void getTasks(){
@@ -235,8 +234,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
      * @param task the task to be added to the list
      */
     private void addTask(@NonNull Task task) {
-        tasks.add(task);
-        updateTask();
+        this.taskViewModel.createTask(task);
     }
 
     private void deleteTask(Task task){
@@ -313,7 +311,10 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
     }
 
     @Override
-    public void onClickDeleteButton(int position) { this.deleteTask(this.adapter.getTask(position)); }
+    public void onClickDeleteButton(int position) {
+        this.deleteTask(this.adapter.getTask(position));
+        updateTask();
+    }
 
     /**
      * List of all possible sort methods for task

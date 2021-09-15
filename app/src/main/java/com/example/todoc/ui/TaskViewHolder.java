@@ -72,7 +72,6 @@ class TaskViewHolder extends RecyclerView.ViewHolder implements View.OnClickList
 
         final Project taskProject = task.getProject();
         if (taskProject != null) {
-            //imgProject.setSupportImageTintList(ColorStateList.valueOf(taskProject.getColor()));
             imgProject.setColorFilter(taskProject.getColor());
             lblProjectName.setText(taskProject.getName());
         } else {
@@ -86,7 +85,7 @@ class TaskViewHolder extends RecyclerView.ViewHolder implements View.OnClickList
     public void onClick(View v) {
         TasksAdapter.Listener callback = callbackWeakRef.get();
         if(callback != null){
-            callback.onClickDeleteButton(getAbsoluteAdapterPosition());
+            callback.onClickDeleteButton(getAdapterPosition());
         }
     }
 }

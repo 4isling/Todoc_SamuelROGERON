@@ -21,4 +21,6 @@ public interface ProjectDao {
     @Delete
     void deleteProject(Project project);
 
+    @Query("SELECT * FROM Project")
+    LiveData<Project>
 }

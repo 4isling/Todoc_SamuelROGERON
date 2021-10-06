@@ -1,6 +1,7 @@
 package com.example.todoc.ui;
 
 import android.annotation.SuppressLint;
+import android.content.res.ColorStateList;
 import android.view.View;
 import android.widget.TextView;
 
@@ -12,14 +13,12 @@ import com.cleanup.todoc.R;
 import com.example.todoc.model.Project;
 import com.example.todoc.model.Task;
 
-import java.lang.ref.WeakReference;
-
 /**
  * <p>ViewHolder for task items in the tasks list</p>
  *
  * @author Gaëtan HERFRAY
  */
-class TaskViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+class TaskViewHolder extends RecyclerView.ViewHolder {
     /**
      * The circle icon showing the color of the project
      */
@@ -43,21 +42,28 @@ class TaskViewHolder extends RecyclerView.ViewHolder implements View.OnClickList
     /**
      * The listener for when a task needs to be deleted
      */
+    private final DeleteTaskListener deleteTaskListener;
 
-    private WeakReference<TasksAdapter.Listener> callbackWeakRef;
     /**
      * Instantiates a new TaskViewHolder.
      *
      * @param itemView the view of the task item
-
      */
-    TaskViewHolder(@NonNull View itemView) {
+    TaskViewHolder(@NonNull View itemView, @NonNull final DeleteTaskListener deleteTaskListener) {
         super(itemView);
 
+        this.deleteTaskListener = deleteTaskListener;
         imgProject = itemView.findViewById(R.id.img_project);
         lblTaskName = itemView.findViewById(R.id.lbl_task_name);
         lblProjectName = itemView.findViewById(R.id.lbl_project_name);
         imgDelete = itemView.findViewById(R.id.img_delete);
+
+        imgDelete.setOnClickListener(v -> {
+            final Object tag = v.getTag();
+            if(tag instanceof Task){
+                TaskViewHolder.this.deleteTaskListener.onDeleteTask((Task) tag);
+            }
+        });
     }
 
     /**
@@ -70,22 +76,18 @@ class TaskViewHolder extends RecyclerView.ViewHolder implements View.OnClickList
         lblTaskName.setText(task.getName());
         imgDelete.setTag(task);
 
-        final Project taskProject = task.getProject();
+        final long projectId = task.getProjectId();
+        Project taskProject = null;
+        for (Project p : Project.getAllProjects()){
+            if (p.getId() == projectId) taskProject = p;
+        }
+
         if (taskProject != null) {
-            imgProject.setColorFilter(taskProject.getColor());
+            imgProject.setSupportImageTintList(ColorStateList.valueOf(taskProject.getColor()));
             lblProjectName.setText(taskProject.getName());
         } else {
             imgProject.setVisibility(View.INVISIBLE);
             lblProjectName.setText("");
-        }
-
-    }
-
-    @Override
-    public void onClick(View v) {
-        TasksAdapter.Listener callback = callbackWeakRef.get();
-        if(callback != null){
-            callback.onClickDeleteButton(getAdapterPosition());
         }
     }
 }

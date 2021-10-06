@@ -3,10 +3,8 @@ package com.example.todoc.model;
 import android.content.ContentValues;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 import java.util.Calendar;
@@ -17,9 +15,7 @@ import java.util.Comparator;
  *
  * @author Gaëtan HERFRAY
  */
-@Entity(foreignKeys = @ForeignKey(entity = Project.class,
-        parentColumns = "project_id",
-        childColumns = "project_id"))
+@Entity
 public class Task {
 
     @ColumnInfo(name = "task_id")
@@ -41,28 +37,25 @@ public class Task {
     @SuppressWarnings("NullableProblems")
     public long creationTimestamp;
 
-    private static Calendar cal = Calendar.getInstance();
-    private static long CREATION_TIMESTAMP = cal.getTimeInMillis();
+    private static final Calendar cal = Calendar.getInstance();
+    private static final long CREATION_TIMESTAMP = cal.getTimeInMillis();
 
     public Task(){}
 
-    public Task(@NonNull String name) {
+    public Task(long project_id, @NonNull String name, long creationTimestamp) {
+        this.project_id = project_id;
         this.name = name;
+        this.creationTimestamp = creationTimestamp;
     }
 
-    public Task(long projectId, @NonNull String name, long creationTimestamp) {
+    public Task(long id, long projectId, @NonNull String name, long creationTimestamp) {
+        this.setId(id);
         this.setProjectId(projectId);
         this.setName(name);
         this.setCreationTimestamp(creationTimestamp);
     }
 
     // --- GETTER ---
-
-    @Nullable
-    public Project getProject() {
-        return Project.getProjectById(project_id);
-    }
-
     public long getProjectId(){return this.project_id;}
 
     public long getId() {
@@ -128,7 +121,6 @@ public class Task {
         final Task task = new Task();
         if (values.containsKey("name")) task.setName(values.getAsString("name"));
         if (values.containsKey("project_id")) task.setProjectId(values.getAsLong("project_id"));
-        if (values.containsKey("creationTimestamp")) task.setCreationTimestamp(CREATION_TIMESTAMP);
         return task;
     }
 }

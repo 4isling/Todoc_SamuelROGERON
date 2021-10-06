@@ -2,6 +2,7 @@ package com.example.todoc.ui;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,9 +25,9 @@ import com.example.todoc.injection.Injection;
 import com.example.todoc.injection.ViewModelFactory;
 import com.example.todoc.model.Project;
 import com.example.todoc.model.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -37,19 +38,22 @@ import java.util.List;
  *
  * @author Gaëtan HERFRAY
  */
-public class MainActivity extends AppCompatActivity implements TasksAdapter.Listener {
-
-
+public class MainActivity extends AppCompatActivity implements DeleteTaskListener {
     /**
      * List of all projects available in the application
      */
-    private final Project[] allProjects = Project.getAllProjects();
+    private List<Project> allProjects;
 
     /**
      * List of all current tasks of the application
      */
     @NonNull
     private final ArrayList<Task> tasks = new ArrayList<>();
+
+    /**
+     * The adapter which handles the list of tasks
+     */
+    private TasksAdapter adapter = new TasksAdapter(this, tasks);
 
     /**
      * The sort method to be used to display tasks
@@ -91,20 +95,20 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
     @NonNull
     private TextView lblNoTasks;
 
-    private FloatingActionButton addBtn;
-
     // FOR DATA
     private TaskViewModel taskViewModel;
-    /**
-     * The adapter which handles the list of tasks
-     */
-    private TasksAdapter adapter;
+    private Task task;
+
+    private final String sortTypeKey = "sortTypeKey";
+    private int sortInt;
+
 
 
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i("onCreate", "onCreate");
 
         setContentView(R.layout.activity_main);
 
@@ -113,30 +117,79 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
 
         listTasks.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         listTasks.setAdapter(adapter);
-
-        addBtn = findViewById(R.id.fab_add_task);
-        addBtn.setOnClickListener(view -> showAddTaskDialog());
-        this.configureViewModel();
         this.configureRecyclerView();
+
+        this.configureViewModel();
         this.getTasks();
+        this.getProjects();
+        findViewById(R.id.fab_add_task).setOnClickListener(view -> showAddTaskDialog());
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt(sortTypeKey,sortInt);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.i("onRestore", "onRestore");
+        sortInt = savedInstanceState.getInt(sortTypeKey);
+        this.sortConfig();
+        this.adapter.updateTasks(tasks);
+    }
+
+    // UI
+    private void configureRecyclerView(){
+        this.adapter = new TasksAdapter(this, tasks);
+        this.listTasks.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        this.listTasks.setAdapter(this.adapter);
+    }
+
+    private void sortConfig(){
+        Log.i("sortConfig", "sortConfig");
+        if (sortInt == 0)  {
+            sortMethod = SortMethod.ALPHABETICAL;
+        } else if (sortInt == 1) {
+            sortMethod = SortMethod.ALPHABETICAL_INVERTED;
+        } else if (sortInt == 3) {
+            sortMethod = SortMethod.OLD_FIRST;
+        } else if (sortInt == 2) {
+            sortMethod = SortMethod.RECENT_FIRST;
+        }
+        updateTask();
     }
 
     //DATA
+    private void getProjects() {
+        this.allProjects = Arrays.asList(Project.getAllProjects());
+    }
 
     private void configureViewModel(){
         ViewModelFactory mViewModelFactory = Injection.provideViewModelFactory(this);
         this.taskViewModel = ViewModelProviders.of(this, mViewModelFactory).get(TaskViewModel.class);
+        this.taskViewModel.init(1L);
     }
 
     private void getTasks(){
         this.taskViewModel.getTasks().observe(this, this::updateTasks);
     }
 
-    private void createTask(){
-        Task task = new Task();
-        this.taskViewModel.createTask(task);
+    private void deleteTask(Task task){
+        this.taskViewModel.deleteTask(task);;
     }
 
+    private void updateTasks(List<Task> tasks){
+        this.tasks.clear();
+        this.tasks.addAll(tasks);
+        if(tasks.size()>0){
+            lblNoTasks.setVisibility(View.GONE);
+        } else  {
+            lblNoTasks.setVisibility(View.VISIBLE);
+        }
+        this.adapter.updateTasks(tasks);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -150,20 +203,28 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
 
         if (id == R.id.filter_alphabetical) {
             sortMethod = SortMethod.ALPHABETICAL;
+            sortInt = 0;
         } else if (id == R.id.filter_alphabetical_inverted) {
             sortMethod = SortMethod.ALPHABETICAL_INVERTED;
+            sortInt = 1;
         } else if (id == R.id.filter_oldest_first) {
             sortMethod = SortMethod.OLD_FIRST;
+            sortInt = 3;
         } else if (id == R.id.filter_recent_first) {
             sortMethod = SortMethod.RECENT_FIRST;
+            sortInt = 2;
         }
 
         updateTask();
-
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    public void onDeleteTask(Task task){
+        tasks.remove(task);
+        deleteTask(task);
+        updateTask();
+    }
 
     /**
      * Called when the user clicks on the positive button of the Create Task Dialog.
@@ -173,6 +234,7 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
     private void onPositiveButtonClick(DialogInterface dialogInterface) {
         // If dialog is open
         if (dialogEditText != null && dialogSpinner != null) {
+
             // Get the name of the task
             String taskName = dialogEditText.getText().toString();
 
@@ -186,29 +248,24 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
             if (taskName.trim().isEmpty()) {
                 dialogEditText.setError(getString(R.string.empty_task_name));
             }
+
             // If both project and name of the task have been set
             else if (taskProject != null) {
-                // TODO: Replace this by id of persisted task
-
-
 
                 Task task = new Task(taskProject.getId(),
                         taskName,
                         new Date().getTime()
                 );
-
-                this.taskViewModel.createTask(task);
-
                 addTask(task);
-
                 dialogInterface.dismiss();
+                updateTask();
             }
             // If name has been set, but project has not been set (this should never occur)
             else {
                 dialogInterface.dismiss();
             }
         }
-        // If dialog is aloready closed
+        // If dialog is already closed
         else {
             dialogInterface.dismiss();
         }
@@ -234,13 +291,12 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
      * @param task the task to be added to the list
      */
     private void addTask(@NonNull Task task) {
+        this.tasks.add(task);
         this.taskViewModel.createTask(task);
+        updateTask();
     }
 
-    private void deleteTask(Task task){
-        this.taskViewModel.deleteTask(task.getId());
 
-    }
     /**
      * Updates the list of tasks in the UI
      */
@@ -264,9 +320,8 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
                 case OLD_FIRST:
                     Collections.sort(tasks, new Task.TaskOldComparator());
                     break;
-
             }
-            adapter.updateTasks(tasks);
+            this.adapter.updateTasks(tasks);
         }
     }
 
@@ -310,12 +365,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
         }
     }
 
-    @Override
-    public void onClickDeleteButton(int position) {
-        this.deleteTask(this.adapter.getTask(position));
-        updateTask();
-    }
-
     /**
      * List of all possible sort methods for task
      */
@@ -341,20 +390,4 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.List
          */
         NONE
     }
-
-    //DB interactions
-
-
-    // UI
-    private void configureRecyclerView(){
-        this.adapter = new TasksAdapter(this);
-        this.listTasks.setAdapter(this.adapter);
-        this.listTasks.setLayoutManager(new LinearLayoutManager(this));
-    }
-
-    private void updateTasks(List<Task> tasks){
-        this.adapter.updateData(tasks);
-    }
-
-
 }

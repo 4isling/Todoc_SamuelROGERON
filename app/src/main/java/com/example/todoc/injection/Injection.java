@@ -3,7 +3,6 @@ package com.example.todoc.injection;
 import android.content.Context;
 
 import com.example.todoc.database.SaveMyTaskDatabase;
-import com.example.todoc.repositories.ProjectDataRepository;
 import com.example.todoc.repositories.TaskDataRepository;
 
 import java.util.concurrent.Executor;
@@ -16,18 +15,13 @@ public class Injection {
         return new TaskDataRepository(database.taskDao());
     }
 
-    public static ProjectDataRepository provideProjectDataSource(Context context){
-        SaveMyTaskDatabase database = SaveMyTaskDatabase.getInstance(context);
-        return new ProjectDataRepository(database.projectDao());
-    }
-
     public static Executor provideExecutor(){
         return Executors.newSingleThreadExecutor();
     }
+
     public static ViewModelFactory provideViewModelFactory(Context context){
-        TaskDataRepository dataSourceTask = provideTaskDataSource(context);
-        ProjectDataRepository dataSourceProject = provideProjectDataSource(context);
+        TaskDataRepository dataSourceTask = provideTaskDataSource(context);;
         Executor executor = provideExecutor();
-        return new ViewModelFactory(dataSourceTask, dataSourceProject, executor);
+        return new ViewModelFactory(dataSourceTask, executor);
     }
 }

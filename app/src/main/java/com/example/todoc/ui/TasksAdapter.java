@@ -1,6 +1,5 @@
 package com.example.todoc.ui;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.cleanup.todoc.R;
 import com.example.todoc.model.Task;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,12 +23,12 @@ public class TasksAdapter extends RecyclerView.Adapter<TaskViewHolder> {
      */
     private List<Task> tasks;
 
-    public interface Listener { void onClickDeleteButton(int position);}
-    private final Listener callback;
+    @NonNull
+    private final DeleteTaskListener deleteTaskListener;
 
-    public TasksAdapter(Listener callback) {
-        this.tasks = new ArrayList<>();
-        this.callback = callback;
+    public TasksAdapter(@NonNull final DeleteTaskListener deleteTaskListener, @NonNull final List<Task> tasks) {
+        this.tasks = tasks;
+        this.deleteTaskListener = deleteTaskListener;
     }
 
     /**
@@ -46,11 +44,8 @@ public class TasksAdapter extends RecyclerView.Adapter<TaskViewHolder> {
     @NonNull
     @Override
     public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
-        Context context = viewGroup.getContext();
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(R.layout.item_task, viewGroup, false);
-
-        return new TaskViewHolder(view);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_task, viewGroup, false);
+        return new TaskViewHolder(view, deleteTaskListener);
     }
 
     @Override
@@ -60,25 +55,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TaskViewHolder> {
 
     @Override
     public int getItemCount() {
-        return this.tasks.size();
+        return tasks.size();
     }
 
-    public Task getTask(int position){
-        return this.tasks.get(position);
-    }
-
-    public void updateData(List<Task> tasks){
-        this.tasks = tasks;
-        this.notifyDataSetChanged();
-    }
-
-
-    public interface DeleteTaskListener {
-        /**
-         * Called when a task needs to be deleted.
-         *
-         * @param task the task that needs to be deleted
-         */
-        void onDeleteTask(Task task);
-    }
 }

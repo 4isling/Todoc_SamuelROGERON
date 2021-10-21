@@ -24,4 +24,16 @@ public interface  TaskDao {
 
     @Delete
     int deleteTask(Task task);
+
+    @Query("SELECT * FROM Task ORDER BY task_name ASC")
+    LiveData<List<Task>> getTaskAZ();
+
+    @Query("SELECT * FROM Task ORDER BY task_name DESC")
+    LiveData<List<Task>> getTaskZA();
+
+    @Query("SELECT * FROM task ORDER BY creationTimestamp ASC")
+    LiveData<List<Task>> getTaskRecentFirst();
+
+    @Query("SELECT * FROM task ORDER BY creationTimestamp DESC")
+    LiveData<List<Task>> getTaskOldFirst();
 }

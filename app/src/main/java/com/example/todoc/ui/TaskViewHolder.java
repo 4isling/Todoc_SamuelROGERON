@@ -53,6 +53,7 @@ class TaskViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
 
         this.deleteTaskListener = deleteTaskListener;
+
         imgProject = itemView.findViewById(R.id.img_project);
         lblTaskName = itemView.findViewById(R.id.lbl_task_name);
         lblProjectName = itemView.findViewById(R.id.lbl_project_name);

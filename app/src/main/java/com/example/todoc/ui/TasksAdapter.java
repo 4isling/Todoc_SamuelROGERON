@@ -21,14 +21,15 @@ public class TasksAdapter extends RecyclerView.Adapter<TaskViewHolder> {
     /**
      * The list of tasks the adapter deals with
      */
+    @NonNull
     private List<Task> tasks;
 
     @NonNull
     private final DeleteTaskListener deleteTaskListener;
 
-    public TasksAdapter(@NonNull final DeleteTaskListener deleteTaskListener, @NonNull final List<Task> tasks) {
-        this.tasks = tasks;
+    TasksAdapter(@NonNull  final List<Task> tasks,@NonNull final DeleteTaskListener deleteTaskListener) {
         this.deleteTaskListener = deleteTaskListener;
+        this.tasks = tasks;
     }
 
     /**

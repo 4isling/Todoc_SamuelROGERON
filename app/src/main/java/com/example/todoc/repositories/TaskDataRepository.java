@@ -23,6 +23,22 @@ public class TaskDataRepository {
         return this.taskDao.getAllTask();
     }
 
+    public LiveData<List<Task>> getTaskAZ(){
+        return this.taskDao.getTaskAZ();
+    }
+
+    public LiveData<List<Task>> getTaskZA(){
+        return this.taskDao.getTaskZA();
+    }
+
+    public LiveData<List<Task>> getTaskRecentFirst(){
+        return this.taskDao.getTaskRecentFirst();
+    }
+
+    public LiveData<List<Task>> getTaskOldFirst(){
+        return this.taskDao.getTaskOldFirst();
+    }
+
     public void createTask(Task task){
         this.taskDao.createTask(task);
     }

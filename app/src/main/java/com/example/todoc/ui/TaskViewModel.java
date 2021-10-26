@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel;
 import com.example.todoc.model.Task;
 import com.example.todoc.repositories.TaskDataRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -15,10 +14,6 @@ public class TaskViewModel extends ViewModel {
 
     private final TaskDataRepository taskDataSource;
     private final Executor executor;
-
-    private int sortInt = 5;
-    private LiveData<List<Task>> tasksLiveData;
-    private ArrayList<List<Task>> taskArrayList;
 
     // DATA
     @Nullable
@@ -34,62 +29,16 @@ public class TaskViewModel extends ViewModel {
     // -------------
 
     public LiveData<List<Task>> getTasks(){
-        if(tasksLiveData == null){
-            return taskDataSource.getAllTask();
-        }else {
-            return tasksLiveData;
-        }
+        return taskDataSource.getAllTask();
     }
 
     public void createTask(Task task) {
-        executor.execute(() -> {
-            taskDataSource.createTask(task);
-        });
+        executor.execute(() -> taskDataSource.createTask(task));
     }
 
     public void deleteTask(Task task) {
-        executor.execute(() -> {
-            taskDataSource.deleteTask(task);
-        });
+        executor.execute(() -> taskDataSource.deleteTask(task));
     }
-
-    // -------------
-    // FOR sort
-    // -------------
-    public LiveData<List<Task>> configSortList(){
-        int sortInt = getSortInt();
-        switch (sortInt){
-            case 0:
-                this.tasksLiveData = taskDataSource.getTaskAZ();
-                break;
-            case 1:
-                this.tasksLiveData = taskDataSource.getTaskZA();
-                break;
-            case 2:
-                this.tasksLiveData = taskDataSource.getTaskRecentFirst();
-                break;
-            case 3:
-                this.tasksLiveData = taskDataSource.getTaskOldFirst();
-                break;
-            default:
-                this.tasksLiveData = taskDataSource.getAllTask();
-                break;
-        }
-        return tasksLiveData;
-    }
-
-    // mettre la logique de tri dans le view model
-    // tirer la liste des taches recupere les taches
-
-    public LiveData<List<Task>> setSort(int sortInt) {
-        this.sortInt = sortInt;
-        return configSortList();
-    }
-
-    public int getSortInt() {
-        return this.sortInt;
-    }
-
 
 
 //surement rajouter le tri ici
@@ -98,6 +47,25 @@ public class TaskViewModel extends ViewModel {
             return;
         }
         currentTask = taskDataSource.getTask(task_id);
-        tasksLiveData = taskDataSource.getAllTask();
     }
+
+    // fonction lists
+    public LiveData<List<Task>>getTaskSortedAZ(){
+        return taskDataSource.getTaskAZ();
+    }
+
+    public LiveData<List<Task>>getTasksSortedZA(){
+        return taskDataSource.getTaskZA();
+    }
+
+    public LiveData<List<Task>>getTasksSortedRecentFirst(){
+        return taskDataSource.getTaskRecentFirst();
+    }
+
+    public LiveData<List<Task>>getTasksSortedOldFirst(){
+        return taskDataSource.getTaskOldFirst();
+    }
+
+
+
 }

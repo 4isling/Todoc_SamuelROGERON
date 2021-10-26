@@ -99,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements DeleteTaskListene
 
     private final String sortTypeKey = "sortTypeKey";
 
+    private int sortInt;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,10 +119,11 @@ public class MainActivity extends AppCompatActivity implements DeleteTaskListene
         this.getProjects();
         this.getTasks();
     }
-/*
+
       @Override protected void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
-      super.onSaveInstanceState(savedInstanceState);
-      savedInstanceState.putInt(sortTypeKey,sortInt);
+        Log.i("onSave", "onSave");
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt(sortTypeKey,sortInt);
       }
 
       @Override protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
@@ -129,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements DeleteTaskListene
       this.sortInt = savedInstanceState.getInt(sortTypeKey);
       this.sortConfig();
       }
-*/
+
 
     // UI
     private void configureRecyclerView(){
@@ -142,13 +145,28 @@ public class MainActivity extends AppCompatActivity implements DeleteTaskListene
         this.allProjects = Arrays.asList(Project.getAllProjects());
     }
 
+    private void sortConfig(){
+        switch (this.sortInt){
+            case 0:
+                sortListAZ();
+                break;
+            case 1:
+                sortListZA();
+                break;
+            case 2:
+                sortListRecentFirst();
+                break;
+            case 3:
+                sortListOldFirst();
+                break;
+        }
+    }
+
     private void configureViewModel() {
         ViewModelFactory mViewModelFactory = Injection.provideViewModelFactory(this);
         this.taskViewModel = ViewModelProviders.of(this, mViewModelFactory).get(TaskViewModel.class);
         this.taskViewModel.init(1L);
     }
-
-
 
     private void getTasks() {
         this.taskViewModel.getTasks().observe(this, this::updateTasks);
@@ -156,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements DeleteTaskListene
 
     private void deleteTask(Task task) {
         this.taskViewModel.deleteTask(task);
+        sortConfig();
     }
 
     @Override
@@ -167,17 +186,20 @@ public class MainActivity extends AppCompatActivity implements DeleteTaskListene
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == R.id.filter_alphabetical) {
-            taskViewModel.setSort(0);
+            sortListAZ();
+            sortInt= 0;
         } else if (id == R.id.filter_alphabetical_inverted) {
-            taskViewModel.setSort(1);
+            sortListZA();
+            sortInt = 1;
         } else if (id == R.id.filter_oldest_first) {
-            taskViewModel.setSort(3);
+            sortListOldFirst();
+            sortInt = 3;
         } else if (id == R.id.filter_recent_first) {
-            taskViewModel.setSort(2);
+            sortListRecentFirst();
+            sortInt = 2;
+
         }
-        updateTask();
         return super.onOptionsItemSelected(item);
     }
 
@@ -185,7 +207,6 @@ public class MainActivity extends AppCompatActivity implements DeleteTaskListene
     public void onDeleteTask(Task task) {
         tasks.remove(task);
         deleteTask(task);
-        updateTask();
     }
 
     /**
@@ -267,26 +288,30 @@ public class MainActivity extends AppCompatActivity implements DeleteTaskListene
         } else {
             lblNoTasks.setVisibility(View.GONE);
             listTasks.setVisibility(View.VISIBLE);
-  /*          switch (sortMethod) {
+            switch (sortMethod) {
                 case ALPHABETICAL:
-                    taskViewModel.setSort(0);
-                    getTasks();
+                    sortListAZ();
+                    sortInt= 0;
                     break;
                 case ALPHABETICAL_INVERTED:
-                    taskViewModel.setSort(1);
-                    getTasks();
+                    sortListZA();
+                    sortInt = 1;
                     break;
                 case RECENT_FIRST:
-                    taskViewModel.setSort(2);
-                    getTasks();
+                    sortListRecentFirst();
+                    sortInt = 2;
                     break;
                 case OLD_FIRST:
-*/                    getTasks();
-    //                break;
+                    sortListOldFirst();
+                    sortInt = 3;
+                    break;
+
             }
           adapter.updateTasks(tasks);
-     //   }
+        }
     }
+
+
 
     private void updateTasks(List<Task> tasks) {
         this.tasks.clear();
@@ -316,9 +341,7 @@ public class MainActivity extends AppCompatActivity implements DeleteTaskListene
             dialogSpinner = null;
             dialog = null;
         });
-
         dialog = alertBuilder.create();
-
         // This instead of listener to positive button in order to avoid automatic dismiss
         dialog.setOnShowListener(dialogInterface -> {
             Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
@@ -338,6 +361,23 @@ public class MainActivity extends AppCompatActivity implements DeleteTaskListene
             dialogSpinner.setAdapter(adapter);
         }
     }
+
+    private void sortListAZ(){
+        taskViewModel.getTaskSortedAZ().observe(this, adapter::updateTasks);
+    }
+
+    private void sortListZA(){
+        taskViewModel.getTasksSortedZA().observe(this, adapter::updateTasks);
+    }
+
+    private void sortListRecentFirst(){
+        taskViewModel.getTasksSortedRecentFirst().observe(this, adapter::updateTasks);
+    }
+
+    private void sortListOldFirst(){
+        taskViewModel.getTasksSortedOldFirst().observe(this, adapter::updateTasks);
+    }
+
 
     /**
      * List of all possible sort methods for task

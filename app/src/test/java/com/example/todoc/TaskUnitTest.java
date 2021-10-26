@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 /**
@@ -28,7 +27,7 @@ public class TaskUnitTest {
         assertEquals("Projet Tartampion", Project.getProjectById(task1.getProjectId()).getName());
         assertEquals("Projet Lucidia", Project.getProjectById(task2.getProjectId()).getName());
         assertEquals("Projet Circus", Project.getProjectById(task3.getProjectId()).getName());
-        assertNull(Project.getProjectById(task4.getProjectId()).getName());
+        assertEquals(null, Project.getProjectById(task4.getProjectId()).getName());
     }
 
     @Test

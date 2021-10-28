@@ -27,9 +27,10 @@ public class TaskDaoTest {
     private static final Calendar cal = Calendar.getInstance();
     private static final long CREATION_TIMESTAMP = cal.getTimeInMillis();
     private static final long PROJECT_ID = 1;
-    private static final Task TASK_DEMO1 = new Task(PROJECT_ID, "task_test1", CREATION_TIMESTAMP);
-    private static final Task TASK_DEMO2 = new Task(PROJECT_ID, "task_test2", Math.addExact(CREATION_TIMESTAMP,1L));
-    private static final Task TASK_DEMO3 = new Task(PROJECT_ID, "task_test3",Math.addExact(CREATION_TIMESTAMP,2L));
+    private static Task TASK_DEMO1 = new Task(0,PROJECT_ID, "Aaa", CREATION_TIMESTAMP);
+    private static Task TASK_DEMO3 = new Task(1,PROJECT_ID, "Ccc",Math.addExact(CREATION_TIMESTAMP,1L));
+    private static Task TASK_DEMO2 = new Task(2,PROJECT_ID, "Bbb", Math.addExact(CREATION_TIMESTAMP,2L));
+
 
     @Rule
     public InstantTaskExecutorRule instantTaskExecutorRule = new InstantTaskExecutorRule();
@@ -81,11 +82,57 @@ public class TaskDaoTest {
         this.database.taskDao().createTask(TASK_DEMO1);
         this.database.taskDao().createTask(TASK_DEMO2);
 
-        this.database.taskDao().getTaskAZ();
         List<Task> tasks = LiveDataTestUtil.getValue(this.database.taskDao().getTaskAZ());
-        assertSame(tasks.get(0).getName(), TASK_DEMO1.getName());
-        assertSame(tasks.get(1).getName(), TASK_DEMO2.getName());
-        assertSame(tasks.get(2).getName(), TASK_DEMO3.getName());
+        String t1 = tasks.get(0).getName();
+        String v1 = TASK_DEMO1.getName();
+
+        String t2 = tasks.get(1).getName();
+        String v2 = TASK_DEMO2.getName();
+
+        String t3 = tasks.get(2).getName();
+        String v3 = TASK_DEMO3.getName();
+        assertSame(t1, v1);
+        assertSame(t2, v2);
+        assertSame(t3, v3);
     }
 
+    @Test
+    public void insertAndSortZA() throws InterruptedException{
+        this.database.taskDao().createTask(TASK_DEMO3);
+        this.database.taskDao().createTask(TASK_DEMO1);
+        this.database.taskDao().createTask(TASK_DEMO2);
+
+        List<Task> tasks = LiveDataTestUtil.getValue(this.database.taskDao().getTaskZA());
+
+        assertSame(tasks.get(0).getName(), TASK_DEMO3.getName());
+        assertSame(tasks.get(1).getName(), TASK_DEMO2.getName());
+        assertSame(tasks.get(2).getName(), TASK_DEMO1.getName());
+
+    }
+
+    @Test
+    public void insertAndSortRecentFirst() throws InterruptedException {
+        this.database.taskDao().createTask(TASK_DEMO1);
+        this.database.taskDao().createTask(TASK_DEMO2);
+        this.database.taskDao().createTask(TASK_DEMO3);
+
+        List<Task> tasks = LiveDataTestUtil.getValue(this.database.taskDao().getTaskRecentFirst());
+
+        assertSame(tasks.get(0).getCreationTimestamp(), TASK_DEMO1.getCreationTimestamp());
+        assertSame(tasks.get(1).getCreationTimestamp(), TASK_DEMO3.getCreationTimestamp());
+        assertSame(tasks.get(2).getCreationTimestamp(), TASK_DEMO2.getCreationTimestamp());
+    }
+
+    @Test
+    public void insertAndSortOldFirst() throws InterruptedException {
+        this.database.taskDao().createTask(TASK_DEMO1);
+        this.database.taskDao().createTask(TASK_DEMO2);
+        this.database.taskDao().createTask(TASK_DEMO3);
+
+        List<Task> tasks = LiveDataTestUtil.getValue(this.database.taskDao().getTaskOldFirst());
+
+        assertSame(tasks.get(0).getCreationTimestamp(), TASK_DEMO2.getCreationTimestamp());
+        assertSame(tasks.get(1).getCreationTimestamp(), TASK_DEMO3.getCreationTimestamp());
+        assertSame(tasks.get(2).getCreationTimestamp(), TASK_DEMO1.getCreationTimestamp());
+    }
 }

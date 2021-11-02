@@ -81,17 +81,10 @@ public class TaskDaoTest {
         this.database.taskDao().createTasks(TASK_DEMO3, TASK_DEMO1, TASK_DEMO2);
 
         List<Task> tasks = LiveDataTestUtil.getValue(this.database.taskDao().getTaskAZ());
-        String t1 = tasks.get(0).getName();
-        String v1 = TASK_DEMO1.getName();
 
-        String t2 = tasks.get(1).getName();
-        String v2 = TASK_DEMO2.getName();
-
-        String t3 = tasks.get(2).getName();
-        String v3 = TASK_DEMO3.getName();
-        assertEquals(t1 , v1);
-        assertEquals(t2, v2);
-        assertEquals(t3, v3);
+        assertEquals(tasks.get(0).getName() , TASK_DEMO1.getName());
+        assertEquals(tasks.get(1).getName(), TASK_DEMO2.getName());
+        assertEquals(tasks.get(2).getName(), TASK_DEMO3.getName());
     }
 
     @Test

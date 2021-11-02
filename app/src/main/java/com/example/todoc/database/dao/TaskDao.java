@@ -36,4 +36,7 @@ public interface  TaskDao {
 
     @Query("SELECT * FROM task ORDER BY creationTimestamp DESC")
     LiveData<List<Task>> getTaskOldFirst();
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void createTasks(Task ...task);
 }

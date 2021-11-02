@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import java.util.Calendar;
 import java.util.List;
 
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
@@ -27,8 +27,8 @@ public class TaskDaoTest {
     private static final Calendar cal = Calendar.getInstance();
     private static final long CREATION_TIMESTAMP = cal.getTimeInMillis();
     private static final long PROJECT_ID = 1;
-    private static Task TASK_DEMO1 = new Task(0,PROJECT_ID, "Aaa", CREATION_TIMESTAMP);
-    private static Task TASK_DEMO3 = new Task(1,PROJECT_ID, "Ccc",Math.addExact(CREATION_TIMESTAMP,1L));
+    private static Task TASK_DEMO1 = new Task(3,PROJECT_ID, "Aaa", CREATION_TIMESTAMP);
+    private static Task TASK_DEMO3 = new Task(1,PROJECT_ID, "Ccc", Math.addExact(CREATION_TIMESTAMP,1L));
     private static Task TASK_DEMO2 = new Task(2,PROJECT_ID, "Bbb", Math.addExact(CREATION_TIMESTAMP,2L));
 
 
@@ -62,7 +62,7 @@ public class TaskDaoTest {
 
 
         List<Task> tasks = LiveDataTestUtil.getValue(this.database.taskDao().getAllTask());
-        assertTrue(tasks.size() == 2);
+        assertEquals(tasks.size(), 2);
     }
 
     @Test
@@ -78,9 +78,7 @@ public class TaskDaoTest {
 
     @Test
     public void insertAndSortAZ() throws InterruptedException{
-        this.database.taskDao().createTask(TASK_DEMO3);
-        this.database.taskDao().createTask(TASK_DEMO1);
-        this.database.taskDao().createTask(TASK_DEMO2);
+        this.database.taskDao().createTasks(TASK_DEMO3, TASK_DEMO1, TASK_DEMO2);
 
         List<Task> tasks = LiveDataTestUtil.getValue(this.database.taskDao().getTaskAZ());
         String t1 = tasks.get(0).getName();
@@ -91,9 +89,9 @@ public class TaskDaoTest {
 
         String t3 = tasks.get(2).getName();
         String v3 = TASK_DEMO3.getName();
-        assertSame(t1, v1);
-        assertSame(t2, v2);
-        assertSame(t3, v3);
+        assertEquals(t1 , v1);
+        assertEquals(t2, v2);
+        assertEquals(t3, v3);
     }
 
     @Test
@@ -104,9 +102,9 @@ public class TaskDaoTest {
 
         List<Task> tasks = LiveDataTestUtil.getValue(this.database.taskDao().getTaskZA());
 
-        assertSame(tasks.get(0).getName(), TASK_DEMO3.getName());
-        assertSame(tasks.get(1).getName(), TASK_DEMO2.getName());
-        assertSame(tasks.get(2).getName(), TASK_DEMO1.getName());
+        assertEquals(tasks.get(0).getName(), TASK_DEMO3.getName());
+        assertEquals(tasks.get(1).getName(), TASK_DEMO2.getName());
+        assertEquals(tasks.get(2).getName(), TASK_DEMO1.getName());
 
     }
 
@@ -118,9 +116,9 @@ public class TaskDaoTest {
 
         List<Task> tasks = LiveDataTestUtil.getValue(this.database.taskDao().getTaskRecentFirst());
 
-        assertSame(tasks.get(0).getCreationTimestamp(), TASK_DEMO1.getCreationTimestamp());
-        assertSame(tasks.get(1).getCreationTimestamp(), TASK_DEMO3.getCreationTimestamp());
-        assertSame(tasks.get(2).getCreationTimestamp(), TASK_DEMO2.getCreationTimestamp());
+        assertEquals(tasks.get(0).getCreationTimestamp(), TASK_DEMO1.getCreationTimestamp());
+        assertEquals(tasks.get(1).getCreationTimestamp(), TASK_DEMO3.getCreationTimestamp());
+        assertEquals(tasks.get(2).getCreationTimestamp(), TASK_DEMO2.getCreationTimestamp());
     }
 
     @Test
@@ -131,8 +129,8 @@ public class TaskDaoTest {
 
         List<Task> tasks = LiveDataTestUtil.getValue(this.database.taskDao().getTaskOldFirst());
 
-        assertSame(tasks.get(0).getCreationTimestamp(), TASK_DEMO2.getCreationTimestamp());
-        assertSame(tasks.get(1).getCreationTimestamp(), TASK_DEMO3.getCreationTimestamp());
-        assertSame(tasks.get(2).getCreationTimestamp(), TASK_DEMO1.getCreationTimestamp());
+        assertEquals(tasks.get(0).getCreationTimestamp(), TASK_DEMO2.getCreationTimestamp());
+        assertEquals(tasks.get(1).getCreationTimestamp(), TASK_DEMO3.getCreationTimestamp());
+        assertEquals(tasks.get(2).getCreationTimestamp(), TASK_DEMO1.getCreationTimestamp());
     }
 }
